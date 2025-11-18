@@ -1,0 +1,790 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Flux</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <!-- Icons & PWA manifest -->
+  <link rel="icon" href="flux_icon_512.png">
+  <link rel="apple-touch-icon" href="flux_icon_512.png">
+  <link rel="manifest" href="manifest.webmanifest">
+  <meta name="theme-color" content="#4A90E2">
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    body {
+      background: #f5f5f7;
+      color: #111827;
+      display: flex;
+      justify-content: center;
+      padding: 16px;
+      transition: background 0.3s ease, color 0.3s ease;
+    }
+
+    .app {
+      background: #ffffff;
+      border-radius: 18px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+      max-width: 420px;
+      width: 100%;
+      padding: 16px 18px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      min-height: 90vh;
+      transition: background 0.3s ease, color 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    header {
+      font-weight: 600;
+      font-size: 1.2rem;
+    }
+
+    header span {
+      font-weight: 700;
+      color: #2563eb;
+    }
+
+    .header-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .progress-wrapper {
+      display: flex;
+      gap: 18px;
+      align-items: center;
+      flex: 1;
+      justify-content: center;
+    }
+
+    .progress-bar {
+      width: 48px;
+      height: 280px;
+      border-radius: 999px;
+      background: #e5e7eb;
+      overflow: hidden;
+      display: flex;
+      align-items: flex-end;
+    }
+
+    .progress-fill {
+      width: 100%;
+      background: linear-gradient(180deg, #4f46e5, #2563eb);
+      height: 0%;
+      transition: height 0.8s cubic-bezier(.17,.67,.75,1.32);
+    }
+
+    .progress-info {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      font-size: 0.9rem;
+    }
+
+    .label {
+      color: #6b7280;
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+
+    .value {
+      font-weight: 600;
+    }
+
+    footer {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .me-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.95rem;
+    }
+
+    .me-row span {
+      font-weight: 600;
+      color: #111827;
+    }
+
+    .buttons {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    button {
+      border: none;
+      border-radius: 999px;
+      padding: 10px 14px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform 0.08s ease, box-shadow 0.08s ease, background 0.2s;
+      white-space: nowrap;
+    }
+
+    button.primary {
+      background: #2563eb;
+      color: #ffffff;
+      box-shadow: 0 8px 18px rgba(37, 99, 235, 0.25);
+      flex: 1;
+    }
+
+    button.primary:hover {
+      background: #1d4ed8;
+    }
+
+    button.secondary {
+      background: #e5e7eb;
+      color: #111827;
+      flex: 1;
+    }
+
+    button:active {
+      transform: translateY(1px);
+      box-shadow: none;
+    }
+
+    .panels {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-top: 4px;
+    }
+
+    .card {
+      background: #f9fafb;
+      border-radius: 14px;
+      padding: 10px 12px;
+      border: 1px solid #e5e7eb;
+      transition: background 0.3s ease, border-color 0.3s ease;
+    }
+
+    .card h3 {
+      font-size: 0.9rem;
+      margin-bottom: 8px;
+    }
+
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      margin-bottom: 8px;
+    }
+
+    .field label {
+      font-size: 0.8rem;
+      color: #6b7280;
+    }
+
+    .field input,
+    .field textarea,
+    .field select {
+      border-radius: 8px;
+      border: 1px solid #d1d5db;
+      padding: 6px 8px;
+      font-size: 0.9rem;
+      width: 100%;
+    }
+
+    .field textarea {
+      resize: vertical;
+      min-height: 48px;
+    }
+
+    .small-btn-row {
+      display: flex;
+      justify-content: flex-end;
+      gap: 6px;
+      margin-top: 4px;
+    }
+
+    .small-btn {
+      padding: 6px 10px;
+      font-size: 0.8rem;
+      border-radius: 999px;
+      border: none;
+      cursor: pointer;
+      background: #e5e7eb;
+    }
+
+    .small-btn.primary {
+      background: #2563eb;
+      color: #fff;
+    }
+
+    .income-list {
+      max-height: 150px;
+      overflow-y: auto;
+      margin-top: 4px;
+      font-size: 0.8rem;
+    }
+
+    .income-item {
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+      padding: 4px 0;
+      border-bottom: 1px dashed #e5e7eb;
+      align-items: center;
+    }
+
+    .income-item:last-child {
+      border-bottom: none;
+    }
+
+    .income-main {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      flex: 1;
+      min-width: 0;
+    }
+
+    .income-main span.amount {
+      font-weight: 600;
+      color: #16a34a;
+    }
+
+    .income-main span.meta {
+      color: #9ca3af;
+      font-size: 0.75rem;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .income-actions {
+      display: flex;
+      gap: 4px;
+    }
+
+    .icon-btn {
+      border-radius: 999px;
+      border: none;
+      padding: 4px 8px;
+      font-size: 0.7rem;
+      cursor: pointer;
+      background: #e5e7eb;
+      color: #374151;
+    }
+
+    .icon-btn.edit {
+      background: #dbeafe;
+      color: #1d4ed8;
+    }
+
+    .icon-btn.delete {
+      background: #fee2e2;
+      color: #b91c1c;
+    }
+
+    .muted {
+      color: #9ca3af;
+      font-size: 0.8rem;
+      margin-top: 2px;
+    }
+
+    /* Dark mode */
+
+    body.dark {
+      background: #0f172a;
+      color: #e2e8f0;
+    }
+
+    body.dark .app {
+      background: #1e293b;
+      color: #f1f5f9;
+      box-shadow: 0 10px 30px rgba(15, 23, 42, 0.7);
+    }
+
+    body.dark .card {
+      background: #273549;
+      border-color: #334155;
+    }
+
+    body.dark .income-item {
+      border-bottom-color: #334155;
+    }
+
+    body.dark .field input,
+    body.dark .field textarea,
+    body.dark .field select {
+      background: #0f172a;
+      border-color: #475569;
+      color: #e5e7eb;
+    }
+
+    body.dark .label {
+      color: #9ca3af;
+    }
+
+    body.dark .me-row span {
+      color: #e5e7eb;
+    }
+
+    body.dark button.secondary {
+      background: #475569;
+      color: #f1f5f9;
+    }
+
+    body.dark button.primary {
+      background: #3b82f6;
+    }
+
+    body.dark .icon-btn.edit {
+      background: #3b82f633;
+      color: #93c5fd;
+    }
+
+    body.dark .icon-btn.delete {
+      background: #f8717133;
+      color: #fca5a5;
+    }
+
+    @media (max-width: 480px) {
+      .app {
+        min-height: 100vh;
+        border-radius: 0;
+        box-shadow: none;
+      }
+    }
+  </style>
+</head>
+<body>
+  <audio id="cash-sound" src="https://actions.google.com/sounds/v1/cartoon/clang_and_wobble.ogg"></audio>
+
+  <div class="app">
+    <div class="header-row">
+      <header>
+        Flux – Goal: <span id="goal-amount">0</span> <span id="goal-currency-label"></span>
+      </header>
+      <button id="dark-toggle" class="icon-btn" title="Toggle dark mode">🌙</button>
+    </div>
+
+    <div class="progress-wrapper">
+      <div class="progress-bar">
+        <div class="progress-fill" id="progress-fill"></div>
+      </div>
+      <div class="progress-info">
+        <div>
+          <div class="label">Progress</div>
+          <div class="value"><span id="progress-amount">0</span> <span id="progress-currency-label"></span></div>
+        </div>
+        <div>
+          <div class="label">Remaining</div>
+          <div class="value"><span id="remaining-amount">0</span> <span id="remaining-currency-label"></span></div>
+        </div>
+        <div>
+          <div class="label">Completion</div>
+          <div class="value"><span id="progress-percent">0</span>%</div>
+        </div>
+      </div>
+    </div>
+
+    <footer>
+      <div class="me-row">
+        <div>Me:</div>
+        <div><span id="me-amount">0</span> <span id="me-currency-label"></span></div>
+      </div>
+
+      <div class="buttons">
+        <button class="secondary" id="set-goal-btn">Set goal & currency</button>
+        <button class="primary" id="add-income-btn">Add income</button>
+        <button class="secondary" id="export-csv-btn">Export CSV</button>
+      </div>
+
+      <div class="panels">
+        <div class="card" id="goal-card" style="display:none;">
+          <h3>Set yearly goal & currency</h3>
+          <div class="field">
+            <label for="goal-input">Goal amount</label>
+            <input type="number" id="goal-input" min="0" step="1" />
+          </div>
+          <div class="field">
+            <label for="currency-select">Currency</label>
+            <select id="currency-select">
+              <option value="RON">RON (lei)</option>
+              <option value="EUR">EUR (€)</option>
+              <option value="USD">USD ($)</option>
+            </select>
+          </div>
+          <div class="small-btn-row">
+            <button class="small-btn" id="cancel-goal">Cancel</button>
+            <button class="small-btn primary" id="save-goal">Save</button>
+          </div>
+        </div>
+
+        <div class="card" id="income-card" style="display:none;">
+          <h3 id="income-card-title">Add income</h3>
+          <div class="field">
+            <label for="income-amount">Amount</label>
+            <input type="number" id="income-amount" min="0" step="1" />
+          </div>
+          <div class="field">
+            <label for="income-date">Date</label>
+            <input type="date" id="income-date" />
+          </div>
+          <div class="field">
+            <label for="income-desc">Description (optional)</label>
+            <textarea id="income-desc" placeholder="Commission, bonus, side income..."></textarea>
+          </div>
+          <div class="small-btn-row">
+            <button class="small-btn" id="cancel-income">Cancel</button>
+            <button class="small-btn primary" id="save-income">Save</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3>Latest entries</h3>
+          <div class="income-list" id="income-list"></div>
+          <div class="muted" id="no-income-msg">No entries yet.</div>
+        </div>
+      </div>
+    </footer>
+  </div>
+
+  <script>
+    const STORAGE_GOAL_KEY = "fp_goal";
+    const STORAGE_INCOME_KEY = "fp_income_entries";
+    const STORAGE_CURRENCY_KEY = "fp_currency";
+    const STORAGE_DARK_KEY = "fp_dark";
+
+    const cashSoundEl = document.getElementById("cash-sound");
+
+    const goalAmountEl = document.getElementById("goal-amount");
+    const goalCurrencyLabelEl = document.getElementById("goal-currency-label");
+    const progressFillEl = document.getElementById("progress-fill");
+    const progressAmountEl = document.getElementById("progress-amount");
+    const progressCurrencyLabelEl = document.getElementById("progress-currency-label");
+    const remainingAmountEl = document.getElementById("remaining-amount");
+    const remainingCurrencyLabelEl = document.getElementById("remaining-currency-label");
+    const progressPercentEl = document.getElementById("progress-percent");
+    const meAmountEl = document.getElementById("me-amount");
+    const meCurrencyLabelEl = document.getElementById("me-currency-label");
+    const incomeListEl = document.getElementById("income-list");
+    const noIncomeMsgEl = document.getElementById("no-income-msg");
+
+    const setGoalBtn = document.getElementById("set-goal-btn");
+    const addIncomeBtn = document.getElementById("add-income-btn");
+    const exportCsvBtn = document.getElementById("export-csv-btn");
+    const darkToggle = document.getElementById("dark-toggle");
+
+    const goalCard = document.getElementById("goal-card");
+    const incomeCard = document.getElementById("income-card");
+
+    const goalInput = document.getElementById("goal-input");
+    const currencySelect = document.getElementById("currency-select");
+    const saveGoalBtn = document.getElementById("save-goal");
+    const cancelGoalBtn = document.getElementById("cancel-goal");
+
+    const incomeCardTitle = document.getElementById("income-card-title");
+    const incomeAmountInput = document.getElementById("income-amount");
+    const incomeDateInput = document.getElementById("income-date");
+    const incomeDescInput = document.getElementById("income-desc");
+    const saveIncomeBtn = document.getElementById("save-income");
+    const cancelIncomeBtn = document.getElementById("cancel-income");
+
+    let editingIncomeId = null;
+
+    function getCurrencySymbol(code) {
+      switch (code) {
+        case "EUR": return "€";
+        case "USD": return "$";
+        case "RON":
+        default: return "lei";
+      }
+    }
+
+    function loadGoal() {
+      const stored = localStorage.getItem(STORAGE_GOAL_KEY);
+      return stored ? parseFloat(stored) : 0;
+    }
+
+    function saveGoal(value) {
+      localStorage.setItem(STORAGE_GOAL_KEY, String(value));
+    }
+
+    function loadCurrency() {
+      const stored = localStorage.getItem(STORAGE_CURRENCY_KEY);
+      return stored || "RON";
+    }
+
+    function saveCurrency(code) {
+      localStorage.setItem(STORAGE_CURRENCY_KEY, code);
+    }
+
+    function loadIncomes() {
+      const stored = localStorage.getItem(STORAGE_INCOME_KEY);
+      if (!stored) return [];
+      try {
+        const parsed = JSON.parse(stored);
+        return parsed.map(e => {
+          if (!e.id) {
+            e.id = Date.now().toString(36) + Math.random().toString(16).slice(2);
+          }
+          return e;
+        });
+      } catch {
+        return [];
+      }
+    }
+
+    function saveIncomes(entries) {
+      localStorage.setItem(STORAGE_INCOME_KEY, JSON.stringify(entries));
+    }
+
+    function formatNumber(n) {
+      return n.toLocaleString("ro-RO", { maximumFractionDigits: 0 });
+    }
+
+    function updateUI() {
+      const goal = loadGoal();
+      const incomes = loadIncomes();
+      const currencyCode = loadCurrency();
+      const currencySymbol = getCurrencySymbol(currencyCode);
+
+      const totalIncome = incomes.reduce((sum, e) => sum + (e.amount || 0), 0);
+
+      goalAmountEl.textContent = formatNumber(goal);
+      goalCurrencyLabelEl.textContent = currencySymbol;
+
+      progressAmountEl.textContent = formatNumber(totalIncome);
+      progressCurrencyLabelEl.textContent = currencySymbol;
+
+      meAmountEl.textContent = formatNumber(totalIncome);
+      meCurrencyLabelEl.textContent = currencySymbol;
+
+      const remaining = Math.max(goal - totalIncome, 0);
+      remainingAmountEl.textContent = formatNumber(remaining);
+      remainingCurrencyLabelEl.textContent = currencySymbol;
+
+      let percent = 0;
+      if (goal > 0) {
+        percent = Math.min((totalIncome / goal) * 100, 100);
+      }
+      progressPercentEl.textContent = percent.toFixed(0);
+      progressFillEl.style.height = percent + "%";
+
+      incomeListEl.innerHTML = "";
+      if (incomes.length === 0) {
+        noIncomeMsgEl.style.display = "block";
+      } else {
+        noIncomeMsgEl.style.display = "none";
+        incomes
+          .slice()
+          .sort((a, b) => new Date(b.date) - new Date(a.date))
+          .slice(0, 20)
+          .forEach((e) => {
+            const item = document.createElement("div");
+            item.className = "income-item";
+
+            const main = document.createElement("div");
+            main.className = "income-main";
+
+            const amountSpan = document.createElement("span");
+            amountSpan.className = "amount";
+            amountSpan.textContent = formatNumber(e.amount) + " " + currencySymbol;
+
+            const metaSpan = document.createElement("span");
+            metaSpan.className = "meta";
+            metaSpan.textContent =
+              (e.date || "") + (e.desc ? " · " + e.desc : "");
+
+            main.appendChild(amountSpan);
+            main.appendChild(metaSpan);
+
+            const actions = document.createElement("div");
+            actions.className = "income-actions";
+
+            const editBtn = document.createElement("button");
+            editBtn.className = "icon-btn edit";
+            editBtn.textContent = "Edit";
+            editBtn.dataset.id = e.id;
+
+            const deleteBtn = document.createElement("button");
+            deleteBtn.className = "icon-btn delete";
+            deleteBtn.textContent = "Delete";
+            deleteBtn.dataset.id = e.id;
+
+            actions.appendChild(editBtn);
+            actions.appendChild(deleteBtn);
+
+            item.appendChild(main);
+            item.appendChild(actions);
+            incomeListEl.appendChild(item);
+          });
+
+        incomeListEl.querySelectorAll(".icon-btn.edit").forEach((btn) => {
+          btn.addEventListener("click", () => {
+            const id = btn.dataset.id;
+            startEditIncome(id);
+          });
+        });
+        incomeListEl.querySelectorAll(".icon-btn.delete").forEach((btn) => {
+          btn.addEventListener("click", () => {
+            const id = btn.dataset.id;
+            deleteIncome(id);
+          });
+        });
+      }
+    }
+
+    function showGoalCard(show) {
+      goalCard.style.display = show ? "block" : "none";
+    }
+
+    function showIncomeCard(show) {
+      incomeCard.style.display = show ? "block" : "none";
+    }
+
+    function startEditIncome(id) {
+      const incomes = loadIncomes();
+      const entry = incomes.find((e) => e.id === id);
+      if (!entry) return;
+
+      editingIncomeId = id;
+      incomeCardTitle.textContent = "Edit income";
+      incomeAmountInput.value = entry.amount;
+      incomeDateInput.value = entry.date || new Date().toISOString().slice(0, 10);
+      incomeDescInput.value = entry.desc || "";
+      showIncomeCard(true);
+      showGoalCard(false);
+    }
+
+    function deleteIncome(id) {
+      const incomes = loadIncomes();
+      const filtered = incomes.filter((e) => e.id !== id);
+      saveIncomes(filtered);
+      updateUI();
+    }
+
+    setGoalBtn.addEventListener("click", () => {
+      const goal = loadGoal();
+      const currencyCode = loadCurrency();
+      goalInput.value = goal || "";
+      currencySelect.value = currencyCode;
+      showGoalCard(true);
+      showIncomeCard(false);
+    });
+
+    saveGoalBtn.addEventListener("click", () => {
+      const value = parseFloat(goalInput.value || "0");
+      if (!isNaN(value) && value >= 0) {
+        saveGoal(value);
+      }
+      const currencyCode = currencySelect.value || "RON";
+      saveCurrency(currencyCode);
+      updateUI();
+      showGoalCard(false);
+    });
+
+    cancelGoalBtn.addEventListener("click", () => {
+      showGoalCard(false);
+    });
+
+    addIncomeBtn.addEventListener("click", () => {
+      editingIncomeId = null;
+      incomeCardTitle.textContent = "Add income";
+      incomeAmountInput.value = "";
+      incomeDescInput.value = "";
+      incomeDateInput.value = new Date().toISOString().slice(0, 10);
+      showIncomeCard(true);
+      showGoalCard(false);
+    });
+
+    saveIncomeBtn.addEventListener("click", () => {
+      const amount = parseFloat(incomeAmountInput.value || "0");
+      if (isNaN(amount) || amount <= 0) {
+        alert("Please enter a valid amount.");
+        return;
+      }
+      const date = incomeDateInput.value || new Date().toISOString().slice(0, 10);
+      const desc = incomeDescInput.value.trim();
+      const incomes = loadIncomes();
+
+      if (editingIncomeId) {
+        const idx = incomes.findIndex((e) => e.id === editingIncomeId);
+        if (idx !== -1) {
+          incomes[idx].amount = amount;
+          incomes[idx].date = date;
+          incomes[idx].desc = desc;
+        }
+        editingIncomeId = null;
+      } else {
+        const id = Date.now().toString(36) + Math.random().toString(16).slice(2);
+        incomes.push({ id, amount, date, desc });
+      }
+
+      saveIncomes(incomes);
+      updateUI();
+      showIncomeCard(false);
+
+      try {
+        cashSoundEl.currentTime = 0;
+        cashSoundEl.play();
+      } catch (e) {}
+    });
+
+    cancelIncomeBtn.addEventListener("click", () => {
+      editingIncomeId = null;
+      showIncomeCard(false);
+    });
+
+    darkToggle.addEventListener("click", () => {
+      document.body.classList.toggle("dark");
+      localStorage.setItem(STORAGE_DARK_KEY, document.body.classList.contains("dark"));
+    });
+
+    exportCsvBtn.addEventListener("click", () => {
+      const incomes = loadIncomes();
+      if (!incomes.length) {
+        alert("No data to export.");
+        return;
+      }
+
+      const csvRows = ["Amount,Date,Description"];
+      incomes.forEach(e => {
+        const safeDesc = (e.desc || "").replace(/"/g, '""');
+        csvRows.push(`${e.amount},${e.date},"${safeDesc}"`);
+      });
+
+      const blob = new Blob([csvRows.join("\n")], { type: "text/csv" });
+      const url = window.URL.createObjectURL(blob);
+
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "financial-progress.csv";
+      a.click();
+      window.URL.revokeObjectURL(url);
+    });
+
+    if (localStorage.getItem(STORAGE_DARK_KEY) === "true") {
+      document.body.classList.add("dark");
+    }
+    updateUI();
+
+    if ("serviceWorker" in navigator) {
+      window.addEventListener("load", () => {
+        navigator.serviceWorker
+          .register("./service-worker.js")
+          .catch((err) => console.log("SW registration failed", err));
+      });
+    }
+  </script>
+</body>
+</html>
