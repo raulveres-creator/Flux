@@ -406,6 +406,7 @@
         <button class="secondary" id="set-goal-btn">Set goal & currency</button>
         <button class="primary" id="add-income-btn">Add income</button>
         <button class="secondary" id="export-csv-btn">Export CSV</button>
+        <button class="secondary" id="install-app-btn" style="display:none;">Install app</button>
       </div>
 
       <div class="panels">
@@ -483,6 +484,36 @@
     const addIncomeBtn = document.getElementById("add-income-btn");
     const exportCsvBtn = document.getElementById("export-csv-btn");
     const darkToggle = document.getElementById("dark-toggle");
+    const installAppBtn = document.getElementById("install-app-btn");
+    let deferredPrompt = null;
+
+    // =========================
+// PWA Install Prompt
+// =========================
+
+window.addEventListener("beforeinstallprompt", (e) => {
+    e.preventDefault();
+    deferredPrompt = e;
+
+    // Arată butonul de instalare
+    installAppBtn.style.display = "inline-block";
+});
+
+installAppBtn.addEventListener("click", async () => {
+    if (!deferredPrompt) return;
+
+    deferredPrompt.prompt();
+    const result = await deferredPrompt.userChoice;
+
+    if (result.outcome === "accepted") {
+        console.log("User installed the app");
+    }
+
+    deferredPrompt = null;
+    installAppBtn.style.display = "none";
+});
+
+
 
     const goalCard = document.getElementById("goal-card");
     const incomeCard = document.getElementById("income-card");
